@@ -1,0 +1,8 @@
+battle_settings:
+  benchmark_runs: 1000 
+  execution_timeout: 2.0 
+  complexity_penalty: 100
+
+llm_settings:
+  max_retries: 2
+  default_model: "llama3.1"

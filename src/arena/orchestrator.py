@@ -29,7 +29,7 @@ class BattleArena:
                 name=agent_conf['name'],
                 role=agent_conf['role'],
                 model=agent_conf['model'],
-                personality=agent_conf['personality']
+                prompt_file=agent_conf['prompt_file']
             )
             self.agents.append(new_agent)
         print(colored("All agents ready!\n", "cyan"))

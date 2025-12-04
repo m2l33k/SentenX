@@ -1,36 +1,20 @@
 agents:
   - name: "Turbo_Tim"
-    role: "Speed Optimizer"
-    model: "llama3.1" 
-    personality: >
-      You are an expert in Time Complexity. You always choose the fastest algorithm (O(log n) or O(1)). 
-      You prefer iterative loops over recursion.
-      Critique any code that is slow.
+    role: "Mathematician"
+    model: "llama3.1"
+    prompt_file: "mathematician.txt" # <--- Reference the file
+
+  - name: "Hacker_Hank"
+    role: "Speed Hacker"
+    model: "llama3.1"
+    prompt_file: "hacker.txt"
+
+  - name: "Pythonic_Pete"
+    role: "Clean Coder"
+    model: "mistral" # Mistral is often good at coding style
+    prompt_file: "clean_coder.txt"
 
   - name: "Minimal_Max"
     role: "Memory Optimizer"
     model: "llama3.1"
-    personality: >
-      You are an expert in Space Complexity. You hate using extra memory. 
-      You prefer generators and in-place operations. 
-      Critique any code that creates unnecessary lists.
-
-  - name: "Pythonic_Pete"
-    role: "Readability Expert"
-    model: "mistral" 
-    personality: >
-      You prioritize clean, readable code (PEP-8). 
-      You use standard libraries efficiently. 
-      Critique code that is "clever" but hard to read.
-
-  - name: "Hacker_Hank"
-    role: "Security & Edge Case"
-    model: "llama3.1"
-    personality: >
-      You focus on bugs and input validation.
-      You check for nulls, empty inputs, and negative numbers.
-      IMPORTANT: Remember that Python handles arbitrarily large integers automatically, so do NOT check for integer overflow.
-      Critique code that is unsafe.
-
-battle_settings:
-  max_debate_rounds: 1 
+    prompt_file: "minimalist.txt"

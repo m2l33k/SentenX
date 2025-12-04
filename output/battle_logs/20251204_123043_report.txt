@@ -1,0 +1,21 @@
+BATTLE ID: 20251204_123043
+PROBLEM: Write a function that returns the factorial of a number.
+
+--- ROUND 1 RESULTS ---
+Turbo_Tim | Time: 0.000000s | Comp: 4 | Success: True
+Hacker_Hank | Time: 0.000001s | Comp: 3 | Success: False
+Pythonic_Pete | Time: 0.000002s | Comp: 1 | Success: True
+Minimal_Max | Time: 0.000001s | Comp: 2 | Success: True
+
+--- ROUND 2 RESULTS ---
+Hacker_Hank (R2) | Time: 0.000001s | Result: BROKE THE CODE: Wrong Answer. Got 524288, expected 2432902008176640000
+Pythonic_Pete (R2) | Time: 0.000001s | Result: IMPROVED by 0.000001s!
+Minimal_Max (R2) | Time: 0.000000s | Result: BROKE THE CODE: Wrong Answer. Got <generator object solution at 0x7f271fce2880>, expected 2432902008176640000
+
+==================================================
+🏆 FINAL CHAMPIONSHIP RANKINGS 🏆
+==================================================
+1. Turbo_Tim (R1) | Time: 0.00000008s | Complexity: 4
+2. Pythonic_Pete (R2) | Time: 0.00000107s | Complexity: 4
+❌ Minimal_Max (R2) FAILED | Msg: Wrong Answer. Got <generator object solution at 0x7f271fce2880>, expected 2432902008176640000
+❌ Hacker_Hank (R2) FAILED | Msg: Wrong Answer. Got 524288, expected 2432902008176640000
