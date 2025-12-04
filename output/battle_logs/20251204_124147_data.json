@@ -1,0 +1,50 @@
+{
+    "battle_id": "20251204_124147",
+    "timestamp": "2025-12-04 12:43:22",
+    "log_lines": [
+        "BATTLE ID: 20251204_124147",
+        "PROBLEM: Write a function factorial\n",
+        "   \u21b3 Turbo_Tim | Time: 0.000000s | Comp: 1 | Success: True",
+        "   \u21b3 Hacker_Hank | Time: 999.000000s | Comp: 4 | Success: False",
+        "   \u21b3 Pythonic_Pete | Time: 0.000001s | Comp: 2 | Success: True",
+        "   \u21b3 Minimal_Max | Time: 0.000000s | Comp: 2 | Success: True"
+    ],
+    "results": [
+        {
+            "agent": "Turbo_Tim",
+            "complexity": 1,
+            "time": 8.259004971478134e-08,
+            "success": true,
+            "msg": "Success",
+            "code": "import math\n\ndef solution(n):\n    return math.factorial(n)",
+            "round": 1
+        },
+        {
+            "agent": "Hacker_Hank",
+            "complexity": 4,
+            "time": 999.0,
+            "success": false,
+            "msg": "Runtime Error: name '_0_f' is not defined",
+            "code": "def solution(n):\n    _0xf = [1] * (_0x1 := n + 1)\n    for i in range(2, n+1):\n        _0_x = (i & 1) ^ 1\n        _0_y = ((i - _0_x) >> 1) * _0_x\n        _0_z = (i >> 31) ^ ~(_0_x << 30)\n        for j in range(i, n+1, i):\n            _0_a = _0_f[j] + (_0_f[j-i]*_0_y if _0_z else _0_f[j-i])\n            _0_f[j] = _0_a\n    return _0_f[-1]",
+            "round": 2
+        },
+        {
+            "agent": "Pythonic_Pete",
+            "complexity": 2,
+            "time": 999.0,
+            "success": false,
+            "msg": "Runtime Error: Cannot instantiate typing.Optional",
+            "code": "from typing import Optional\nfrom functools import lru_cache\n\ndef factorial(n: int) -> Optional[int]:\n    \"\"\"\n    Calculate the factorial of given number using recursion with memoization.\n\n    :param n: an integer representing the number for which the factorial is to be calculated\n    :return: None if n < 0, else the factorial value as an integer\n    \"\"\"\n\n    @lru_cache(maxsize=None)\n    def fact(n):\n        if n == 0 or n == 1:\n            return 1\n        else:\n            return n * fact(n - 1)\n\n    if n < 0:\n        return None\n    else:\n        return fact(n)",
+            "round": 2
+        },
+        {
+            "agent": "Minimal_Max",
+            "complexity": 2,
+            "time": 2.751099964370951e-07,
+            "success": true,
+            "msg": "Success",
+            "code": "def solution(n):\n    a, x = 1, 2\n    while x <= n: a *= x; x += 1\n    return a",
+            "round": 2
+        }
+    ]
+}

@@ -1,0 +1,4 @@
+def solution(n):
+    _0xF = [0]*n; _0xE = [_0xF[0],_0xF[1]] + [0]*(n-2)
+    for i in range(2,n): _0xE[i] = _0xE[i-1] + _0xE[i-2]
+    return _0xE[-1]

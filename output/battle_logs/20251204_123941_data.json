@@ -1,0 +1,50 @@
+{
+    "battle_id": "20251204_123941",
+    "timestamp": "2025-12-04 12:40:29",
+    "log_lines": [
+        "BATTLE ID: 20251204_123941",
+        "PROBLEM: Write a function that returns the nth Fibonacci number\n",
+        "   \u21b3 Turbo_Tim | Time: 0.000000s | Comp: 2 | Success: False",
+        "   \u21b3 Hacker_Hank | Time: 999.000000s | Comp: 2 | Success: False",
+        "   \u21b3 Pythonic_Pete | Time: 999.000000s | Comp: 3 | Success: False",
+        "   \u21b3 Minimal_Max | Time: 0.000000s | Comp: 3 | Success: False"
+    ],
+    "results": [
+        {
+            "agent": "Turbo_Tim",
+            "complexity": 2,
+            "time": 2.6913003239315e-07,
+            "success": false,
+            "msg": "Wrong Answer. Got 55, expected 3628800",
+            "code": "import math\n\ndef solution(n):\n    if n <= 1:\n        return n\n    sqrt_5 = math.sqrt(5)\n    phi = (1 + sqrt_5) / 2\n    psi = (1 - sqrt_5) / 2\n    result = (phi**n - psi**n) / sqrt_5\n    return int(result)",
+            "round": 1
+        },
+        {
+            "agent": "Hacker_Hank",
+            "complexity": 2,
+            "time": 999.0,
+            "success": false,
+            "msg": "Runtime Error: name '_0_f' is not defined",
+            "code": "def solution(n):\n    _0xf = [0, 1]\n    for _0_i in range(2, n + 1):\n        _0_x = (_0_f[_0_i - 1] << 1) | _0_f[_0_i - 2]\n        _0_f.append(_0_x)\n    return _0_f[n]",
+            "round": 1
+        },
+        {
+            "agent": "Pythonic_Pete",
+            "complexity": 3,
+            "time": 999.0,
+            "success": false,
+            "msg": "Runtime Error: unsupported operand type(s) for +: 'NoneType' and 'int'",
+            "code": "def solution(n: int) -> int:\n    \"\"\"\n    Calculates the nth Fibonacci number using recursion.\n\n    Args:\n        n (int): The position of the Fibonacci number in the sequence (starting from 0).\n\n    Returns:\n        int: The calculated nth Fibonacci number.\n\n    Examples:\n        >>> solution(1)\n        0\n        >>> solution(2)\n        1\n        >>> solution(3)\n        1\n        >>> solution(10)\n        55\n    \"\"\"\n    if n <= 0:\n        raise ValueError(\"Argument 'n' must be a positive integer.\")\n\n    if n <= 2:\n        return 1 - (n % 2)\n\n    def fib_recursive(n, prev=None, current=None):\n        if n == 1:\n            return 1\n        if n == 2:\n            return 1\n\n        if prev is None and current is None:\n            return fib_recursive(n - 1, current=1) + fib_recursive(n - 2, prev=1)\n\n        return fib_recursive(n - 1, current, current + fib_recursive(n - 2, prev))\n\n    return fib_recursive(n)",
+            "round": 1
+        },
+        {
+            "agent": "Minimal_Max",
+            "complexity": 3,
+            "time": 3.1096999009605497e-07,
+            "success": false,
+            "msg": "Wrong Answer. Got 55, expected 3628800",
+            "code": "def solution(n):\n    if n <= 0: return 0\n    a, b = 0, 1\n    for _ in range(2, n+1): a, b = b, a+b\n    return b",
+            "round": 1
+        }
+    ]
+}

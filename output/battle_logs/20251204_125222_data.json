@@ -1,0 +1,50 @@
+{
+    "battle_id": "20251204_125222",
+    "timestamp": "2025-12-04 12:53:44",
+    "log_lines": [
+        "BATTLE ID: 20251204_125222",
+        "PROBLEM: Write a function that returns the nth Fibonacci number\n",
+        "   \u21b3 Turbo_Tim | Time: 0.000000s | Comp: 3 | \u2705 Success",
+        "   \u21b3 Hacker_Hank | \u274c FAILED: Runtime Error: list index out of range",
+        "   \u21b3 Pythonic_Pete | Time: 0.000001s | Comp: 3 | \u2705 Success",
+        "   \u21b3 Minimal_Max | \u274c FAILED: Syntax Error: invalid syntax (<string>, line 5)"
+    ],
+    "results": [
+        {
+            "agent": "Turbo_Tim",
+            "complexity": 3,
+            "time": 2.0715997379738836e-07,
+            "success": true,
+            "msg": "Success",
+            "code": "def solution(n):\n    if n < 2: return n\n    a, b = 0, 1\n    for _ in range(2, n+1): a, b = b, a+b\n    return b",
+            "round": 1
+        },
+        {
+            "agent": "Hacker_Hank",
+            "complexity": 3,
+            "time": 999.0,
+            "success": false,
+            "msg": "Runtime Error: list index out of range",
+            "code": "def solution(n):\n    _0x1 = [0, 1]\n    if n < 2: return n\n    _0x2 = min(n+7>>3, n)\n    for i in range(2, _0x2+1): \n        _0x1.append((_0x1[i-1] << 16) + (_0x1[i-2]))\n    return _0x1[n]\n\nmemo = {0: 0, 1: 1}\ndef fib(n):\n    if n not in memo:\n        memo[n] = (fib(n-1) & ((1<<16)-1)) + (fib(n-2) >> 16)\n    return memo[n]",
+            "round": 2
+        },
+        {
+            "agent": "Pythonic_Pete",
+            "complexity": 2,
+            "time": 999.0,
+            "success": false,
+            "msg": "Runtime Error: Cannot instantiate typing.Union",
+            "code": "from typing import Union\nfrom itertools import accumulate\n\ndef fibonacci(n: int) -> Union[int, None]:\n    \"\"\"\n    Returns the nth Fibonacci number if it exists, otherwise returns None.\n    \"\"\"\n    fib_sequence = list(accumulate(zip([0, 1], repeat=(n - 1))[0], lambda a, b: a[0] + a[1]))\n    return fib_sequence[n - 1] if n <= len(fib_sequence) else None",
+            "round": 2
+        },
+        {
+            "agent": "Minimal_Max",
+            "complexity": 3,
+            "time": 2.0715000573545694e-07,
+            "success": true,
+            "msg": "Success",
+            "code": "def solution(n):\n    if n < 2: return n\n    a, b = 0, 1\n    for _ in range(2, n+1): \n        a, b = b, a+b \n    return b",
+            "round": 2
+        }
+    ]
+}
