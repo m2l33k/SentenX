@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Code Arena Results</title>
+    <!-- Tailwind CSS (Dark Mode) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+</head>
+<body class="bg-gray-900 text-gray-200 font-mono">
+
+    <!-- Navbar -->
+    <nav class="bg-gray-800 border-b border-gray-700 p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-green-400">⚔️ Code Arena Logs</h1>
+            
+            <!-- Battle Selector -->
+            <form action="/" method="get">
+                <select name="id" onchange="this.form.submit()" class="bg-gray-700 text-white p-2 rounded border border-gray-600">
+                    {% for b_id in battles %}
+                        <option value="{{ b_id }}" {% if b_id == selected_id %}selected{% endif %}>
+                            Battle: {{ b_id }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+    </nav>
+
+    <div class="container mx-auto p-6">
+        {% if current_battle %}
+            
+            <!-- Metrics Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-gray-800 p-4 rounded-lg border border-gray-700 shadow-lg">
+                    <h3 class="text-gray-400 text-sm">Timestamp</h3>
+                    <p class="text-xl font-bold">{{ current_battle.timestamp }}</p>
+                </div>
+                <div class="bg-gray-800 p-4 rounded-lg border border-gray-700 shadow-lg">
+                    <h3 class="text-gray-400 text-sm">Winner</h3>
+                    {% set winner = current_battle.results[0] %}
+                    <p class="text-xl font-bold text-yellow-400">
+                        🏆 {{ winner.agent }}
+                    </p>
+                    <p class="text-xs text-gray-500">Time: {{ "%.6f"|format(winner.time) }}s</p>
+                </div>
+                <div class="bg-gray-800 p-4 rounded-lg border border-gray-700 shadow-lg">
+                    <h3 class="text-gray-400 text-sm">Total Competitors</h3>
+                    <p class="text-xl font-bold">{{ current_battle.results|length }}</p>
+                </div>
+            </div>
+
+            <!-- Leaderboard Table -->
+            <div class="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden mb-8">
+                <div class="p-4 bg-gray-750 border-b border-gray-700">
+                    <h2 class="text-lg font-bold text-green-400">📊 Final Rankings</h2>
+                </div>
+                <table class="w-full text-left">
+                    <thead class="bg-gray-700 text-gray-400 uppercase text-sm">
+                        <tr>
+                            <th class="p-4">Rank</th>
+                            <th class="p-4">Agent</th>
+                            <th class="p-4">Phase</th>
+                            <th class="p-4">Time (s)</th>
+                            <th class="p-4">Complexity</th>
+                            <th class="p-4">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-700">
+                        {% for res in current_battle.results %}
+                        <tr class="hover:bg-gray-750 transition">
+                            <td class="p-4 font-bold">#{{ loop.index }}</td>
+                            <td class="p-4 flex items-center gap-2">
+                                <span class="font-bold text-white">{{ res.agent }}</span>
+                            </td>
+                            <td class="p-4">
+                                <span class="px-2 py-1 rounded text-xs {{ 'bg-purple-900 text-purple-300' if res.round == 2 else 'bg-blue-900 text-blue-300' }}">
+                                    {% if res.round == 2 %}Refinement{% else %}Generation{% endif %}
+                                </span>
+                            </td>
+                            <td class="p-4 font-mono text-yellow-300">{{ "%.6f"|format(res.time) }}</td>
+                            <td class="p-4 font-mono">{{ res.complexity }}</td>
+                            <td class="p-4">
+                                {% if res.success %}
+                                    <span class="text-green-500">✅ Success</span>
+                                {% else %}
+                                    <span class="text-red-500">❌ {{ res.msg }}</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Code Comparison -->
+            <h2 class="text-2xl font-bold text-white mb-4">💻 Generated Code</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {% for res in current_battle.results %}
+                <div class="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden shadow-lg">
+                    <div class="p-3 bg-gray-700 flex justify-between items-center">
+                        <span class="font-bold {{ 'text-yellow-400' if loop.index == 1 else 'text-white' }}">
+                            {{ res.agent }}
+                            {% if loop.index == 1 %} (WINNER) {% endif %}
+                        </span>
+                        <span class="text-xs text-gray-400">Complexity: {{ res.complexity }}</span>
+                    </div>
+                    <pre class="m-0"><code class="language-python text-sm" style="max-height: 300px; overflow-y: auto;">{{ res.code }}</code></pre>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Log Output -->
+            <div class="mt-8 bg-black rounded-lg p-6 font-mono text-sm text-green-600 border border-green-900">
+                <h3 class="text-white mb-2">System Logs</h3>
+                {% for line in current_battle.log_lines %}
+                    <div class="whitespace-pre-wrap">{{ line }}</div>
+                {% endfor %}
+            </div>
+
+        {% else %}
+            <div class="text-center py-20">
+                <h2 class="text-2xl text-gray-500">No battle data found yet.</h2>
+                <p class="text-gray-600">Run <code>python main.py</code> first!</p>
+            </div>
+        {% endif %}
+    </div>
+
+</body>
+</html>
