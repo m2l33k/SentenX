@@ -1,8 +1,13 @@
+judge:
+  name: "Justice_Jules"
+  role: "The Supreme Judge"
+  model: "llama3.1" 
+  prompt_file: "judge.txt"
 agents:
   - name: "Turbo_Tim"
     role: "Mathematician"
     model: "llama3.1"
-    prompt_file: "mathematician.txt" # <--- Reference the file
+    prompt_file: "mathematician.txt" 
 
   - name: "Hacker_Hank"
     role: "Speed Hacker"
@@ -11,7 +16,7 @@ agents:
 
   - name: "Pythonic_Pete"
     role: "Clean Coder"
-    model: "mistral" # Mistral is often good at coding style
+    model: "mistral"
     prompt_file: "clean_coder.txt"
 
   - name: "Minimal_Max"

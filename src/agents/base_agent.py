@@ -71,7 +71,7 @@ class Agent:
         
         response = self.llm.get_response(
             model_name=self.model,
-            system_prompt=self.personality, # They keep their personality!
+            system_prompt=self.personality, 
             user_prompt=task_directive
         )
         
@@ -83,3 +83,35 @@ class Agent:
         elif "```" in text:
             return text.split("```")[1].split("```")[0].strip()
         return text
+    def refine_solution_with_critique(self, problem, my_prev_code, winner_code, critique):
+        """
+        Refine code based on specific critique from the Judge.
+        """
+        prompt = f"""
+        PROBLEM: {problem}
+        
+        --- YOUR PREVIOUS CODE ---
+        {my_prev_code}
+        
+        --- THE JUDGE'S CRITIQUE (Fix This!) ---
+        "{critique}"
+        
+        --- WINNING REFERENCE (Optional inspiration) ---
+        {winner_code}
+        
+        TASK:
+        Rewrite your code.
+        1. Address the Judge's critique directly.
+        2. Keep your personality ({self.role}).
+        3. Name the function 'solution'.
+        
+        Return ONLY valid Python code in markdown.
+        """
+        
+        response = self.llm.get_response(
+            model_name=self.model,
+            system_prompt=self.personality,
+            user_prompt=prompt
+        )
+        
+        return self._extract_code(response)
