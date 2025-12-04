@@ -1,25 +1,26 @@
 judge:
-  name: "Justice_Jules"
-  role: "The Supreme Judge"
-  model: "llama3.1" 
+  name: "Supreme_AI"
+  role: "The Arbiter"
+  model: "gpt-4o" 
   prompt_file: "judge.txt"
+
 agents:
   - name: "Turbo_Tim"
-    role: "Mathematician"
-    model: "llama3.1"
-    prompt_file: "mathematician.txt" 
+    role: "Speed Optimizer"
+    model: "llama-3.1" 
+    prompt_file: "mathematician.txt"
 
   - name: "Hacker_Hank"
     role: "Speed Hacker"
-    model: "llama3.1"
+    model: "llama-3.1"
     prompt_file: "hacker.txt"
 
   - name: "Pythonic_Pete"
     role: "Clean Coder"
-    model: "mistral"
+    model: "Mistral" 
     prompt_file: "clean_coder.txt"
 
   - name: "Minimal_Max"
     role: "Memory Optimizer"
-    model: "llama3.1"
+    model: "llama-3.1" 
     prompt_file: "minimalist.txt"

@@ -5,11 +5,36 @@
     <title>AI Mission Control</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- AlpineJS Framework -->
+    <!-- AlpineJS -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <!-- Syntax Highlighting -->
+    <!-- Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Highlight.js -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+    <style>
+        .scrollbar-thin::-webkit-scrollbar { width: 8px; height: 8px; }
+        .scrollbar-thin::-webkit-scrollbar-track { background: #1f2937; }
+        .scrollbar-thin::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
+        .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+        [x-cloak] { display: none !important; }
+
+        /* Podium Styles */
+        .podium-container { display: flex; align-items: flex-end; justify-content: center; gap: 1rem; height: 250px; }
+        .podium-step { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; width: 100px; }
+        .podium-block { width: 100%; border-top-left-radius: 8px; border-top-right-radius: 8px; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 10px; font-weight: bold; font-size: 2rem; color: rgba(0,0,0,0.5); }
+        .avatar { width: 60px; height: 60px; border-radius: 50%; background: #374151; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin-bottom: 10px; border: 4px solid white; box-shadow: 0 4px 6px rgba(0,0,0,0.3); z-index: 10; position: relative; }
+        
+        .gold .podium-block { height: 140px; background: linear-gradient(to top, #ca8a04, #facc15); box-shadow: 0 0 20px rgba(250, 204, 21, 0.4); }
+        .gold .avatar { border-color: #facc15; }
+        
+        .silver .podium-block { height: 100px; background: linear-gradient(to top, #4b5563, #9ca3af); }
+        .silver .avatar { border-color: #9ca3af; }
+        
+        .bronze .podium-block { height: 60px; background: linear-gradient(to top, #78350f, #d97706); }
+        .bronze .avatar { border-color: #d97706; }
+    </style>
 </head>
 <body class="bg-gray-900 text-gray-200 font-mono h-screen flex flex-col" x-data="app()">
 
@@ -23,6 +48,45 @@
             <button @click="tab = 'prompts'" :class="tab === 'prompts' ? 'bg-gray-600 text-white shadow' : 'text-gray-400 hover:text-white'" class="px-4 py-1.5 rounded transition font-bold">🧠 PROMPTS</button>
         </div>
     </header>
+
+    <!-- VICTORY MODAL (POPUP) -->
+    <div x-show="showModal" x-cloak class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4 transition-opacity">
+        <div class="bg-gray-800 border border-gray-600 rounded-2xl p-8 max-w-2xl w-full shadow-2xl relative text-center" @click.away="showModal = false">
+            <button @click="showModal = false" class="absolute top-4 right-4 text-gray-400 hover:text-white">✕</button>
+            
+            <h2 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-200 mb-2 tracking-widest uppercase">Battle Concluded</h2>
+            <div class="text-green-400 mb-8 font-bold text-lg" x-text="finalVerdict ? finalVerdict.winner + ' TAKES THE CROWN!' : 'Calculations complete...'"></div>
+
+            <!-- PODIUM ANIMATION -->
+            <div class="podium-container mb-8" x-show="podium.length > 0">
+                <!-- 2nd Place -->
+                <div class="podium-step silver transform translate-y-4" x-show="podium[1]">
+                    <div class="text-xs text-gray-300 font-bold mb-1 truncate w-20 text-center" x-text="podium[1]?.agent"></div>
+                    <div class="avatar">🥈</div>
+                    <div class="podium-block">2</div>
+                </div>
+                <!-- 1st Place -->
+                <div class="podium-step gold -translate-y-2 scale-110 z-20" x-show="podium[0]">
+                    <div class="text-sm text-yellow-300 font-bold mb-1 truncate w-24 text-center" x-text="podium[0]?.agent"></div>
+                    <div class="avatar">🏆</div>
+                    <div class="podium-block">1</div>
+                </div>
+                <!-- 3rd Place -->
+                <div class="podium-step bronze transform translate-y-8" x-show="podium[2]">
+                    <div class="text-xs text-gray-300 font-bold mb-1 truncate w-20 text-center" x-text="podium[2]?.agent"></div>
+                    <div class="avatar">🥉</div>
+                    <div class="podium-block">3</div>
+                </div>
+            </div>
+
+            <div class="bg-gray-900 rounded-lg p-6 text-left border border-gray-700 shadow-inner">
+                <h3 class="text-xs text-gray-500 font-bold uppercase mb-2">Supreme Judge's Verdict</h3>
+                <p class="text-lg text-white italic font-serif leading-relaxed" x-text="'&quot;' + finalVerdict?.reasoning + '&quot;'"></p>
+            </div>
+            
+            <button @click="showModal = false; tab = 'history'" class="mt-8 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white px-10 py-3 rounded-full font-bold shadow-lg transition transform hover:scale-105">View Full Analysis</button>
+        </div>
+    </div>
 
     <!-- MAIN CONTENT -->
     <main class="flex-grow overflow-hidden relative">
@@ -39,16 +103,16 @@
                     <input type="text" x-model="problem" class="w-full bg-gray-900 border border-gray-600 rounded p-3 text-white focus:border-green-500 outline-none placeholder-gray-600 transition" placeholder="e.g. Write a function to check prime numbers">
                 </div>
 
-                <!-- Test Input -->
+                <!-- Test Input (Optional) -->
                 <div>
-                    <label class="block text-xs text-yellow-500 mb-1 font-bold tracking-wider">TEST INPUT (Arg for Function)</label>
-                    <input type="text" x-model="testInput" class="w-full bg-gray-900 border border-gray-600 rounded p-3 text-yellow-300 font-mono focus:border-yellow-500 outline-none placeholder-gray-600 transition" placeholder="e.g. 10 or [1,2,3]">
+                    <label class="block text-xs text-gray-500 mb-1 font-bold tracking-wider">TEST INPUT (Optional)</label>
+                    <input type="text" x-model="testInput" class="w-full bg-gray-900 border border-gray-600 rounded p-3 text-yellow-300 font-mono focus:border-yellow-500 outline-none placeholder-gray-700 transition" placeholder="Leave empty for Auto">
                 </div>
 
-                <!-- Expected Output -->
+                <!-- Expected Output (Optional) -->
                 <div>
-                    <label class="block text-xs text-blue-500 mb-1 font-bold tracking-wider">EXPECTED RETURN VALUE</label>
-                    <input type="text" x-model="expectedOutput" class="w-full bg-gray-900 border border-gray-600 rounded p-3 text-blue-300 font-mono focus:border-blue-500 outline-none placeholder-gray-600 transition" placeholder="e.g. 55 or True">
+                    <label class="block text-xs text-gray-500 mb-1 font-bold tracking-wider">EXPECTED RETURN (Optional)</label>
+                    <input type="text" x-model="expectedOutput" class="w-full bg-gray-900 border border-gray-600 rounded p-3 text-blue-300 font-mono focus:border-blue-500 outline-none placeholder-gray-700 transition" placeholder="Leave empty for Auto">
                 </div>
 
                 <!-- Start Button -->
@@ -60,6 +124,9 @@
                             PROCESSING AGENTS...
                         </span>
                     </button>
+                    <div class="text-center mt-2 text-xs text-gray-500" x-show="!testInput && !expectedOutput">
+                        ℹ️ "The Architect" will generate test cases automatically.
+                    </div>
                 </div>
             </div>
 
@@ -69,13 +136,13 @@
                 <div class="text-gray-600 italic mb-4">> System Ready. Awaiting parameters...</div>
                 <template x-for="line in logs">
                     <div class="whitespace-pre-wrap border-l-2 border-transparent hover:border-gray-800 pl-2 py-0.5 leading-relaxed" 
-                         :class="line.includes('❌') ? 'text-red-400' : (line.includes('✅') ? 'text-green-400' : 'text-gray-300')"
+                         :class="line.includes('❌') ? 'text-red-400' : (line.includes('✅') ? 'text-green-400' : (line.includes('👑') ? 'text-yellow-400 font-bold' : 'text-gray-300'))"
                          x-text="line"></div>
                 </template>
             </div>
         </div>
 
-        <!-- ================= HISTORY TAB ================= -->
+        <!-- ================= HISTORY TAB (Full Version) ================= -->
         <div x-show="tab === 'history'" class="h-full flex">
             <!-- Sidebar -->
             <div class="w-80 bg-gray-800 border-r border-gray-700 flex flex-col shrink-0">
@@ -87,9 +154,12 @@
                              :class="selectedBattleId === item.id ? 'bg-gray-700 border-green-500 shadow-md' : 'bg-gray-800 hover:bg-gray-700'">
                             <div class="text-[10px] text-gray-400 uppercase tracking-wide" x-text="item.timestamp"></div>
                             <div class="font-bold text-white text-sm truncate mt-1" x-text="item.problem"></div>
+                                
                             <div class="text-xs text-green-400 mt-2 flex items-center gap-1">
-                                <span>🏆</span> <span x-text="item.winner"></span>
+                                 <span>🏆</span> <span x-text="item.champion || item.winner"></span>
                             </div>
+
+  
                         </div>
                     </template>
                 </div>
@@ -99,16 +169,9 @@
             <div class="flex-grow flex flex-col h-full overflow-hidden bg-gray-900 relative">
                 <template x-if="!selectedBattle">
                     <div class="flex flex-col items-center justify-center h-full text-gray-600 gap-4">
-                        <svg class="w-16 h-16 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                         <span>Select a battle record to view analysis</span>
                     </div>
                 </template>
-                <!-- Judge's Verdict Panel -->
-                <div x-show="selectedBattle.judge_verdict" class="mb-6 bg-gray-800 border-l-4 border-yellow-500 p-4 rounded shadow-lg">
-                    <h3 class="text-yellow-400 font-bold uppercase tracking-wider text-xs mb-1">⚖️ Supreme Judge's Verdict</h3>
-                    <p class="text-white text-lg font-bold" x-text="selectedBattle.judge_verdict.winner + ' WINS!'"></p>
-                    <p class="text-gray-400 italic mt-2" x-text="'&quot;' + selectedBattle.judge_verdict.reasoning + '&quot;'"></p>
-                </div>
 
                 <template x-if="selectedBattle">
                     <div class="flex flex-col h-full">
@@ -119,17 +182,23 @@
                                     <span class="text-green-500">Battle Report</span>
                                     <span class="text-sm font-normal text-gray-500 px-2 py-1 bg-gray-900 rounded font-mono" x-text="selectedBattle.battle_id"></span>
                                 </h2>
-                                <div class="text-sm text-gray-400 mt-1 max-w-2xl truncate" x-text="selectedBattle.log_lines[1]"></div>
+                                <div class="text-sm text-gray-400 mt-1 max-w-2xl truncate" x-text="selectedBattle.problem"></div>
                             </div>
                             <div class="text-right bg-gray-900 p-3 rounded border border-gray-700">
                                 <div class="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Champion</div>
-                                <div class="text-2xl font-bold text-yellow-400 mt-1" x-text="selectedBattle.results[0].agent"></div>
+                                <div class="text-2xl font-bold text-yellow-400 mt-1" x-text="selectedBattle.judge_verdict?.winner || 'None'"></div>
                             </div>
                         </div>
 
                         <!-- Content Area -->
                         <div class="overflow-y-auto p-6 space-y-8">
                             
+                            <!-- Judge Verdict Block -->
+                            <div x-show="selectedBattle.judge_verdict" class="bg-gray-800 border-l-4 border-yellow-500 p-4 rounded shadow-lg">
+                                <h3 class="text-yellow-400 font-bold uppercase tracking-wider text-xs mb-1">⚖️ Supreme Judge's Verdict</h3>
+                                <p class="text-gray-300 italic" x-text="selectedBattle.judge_verdict?.reasoning"></p>
+                            </div>
+
                             <!-- Leaderboard Table -->
                             <div class="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden shadow-lg">
                                 <table class="w-full text-left text-sm">
@@ -138,7 +207,7 @@
                                             <th class="p-4">Rank</th>
                                             <th class="p-4">Agent</th>
                                             <th class="p-4">Phase</th>
-                                            <th class="p-4">Execution Time</th>
+                                            <th class="p-4">Time</th>
                                             <th class="p-4">Complexity</th>
                                             <th class="p-4">Status</th>
                                         </tr>
@@ -147,12 +216,9 @@
                                         <template x-for="(res, index) in selectedBattle.results">
                                             <tr class="hover:bg-gray-700/50 transition duration-150">
                                                 <td class="p-4 font-bold text-gray-500" x-text="'#' + (index + 1)"></td>
-                                                <td class="p-4 font-bold text-white flex items-center gap-2">
-                                                    <span x-text="res.agent"></span>
-                                                    <span x-show="index === 0" class="text-yellow-400 text-xs">👑</span>
-                                                </td>
+                                                <td class="p-4 font-bold text-white" x-text="res.agent"></td>
                                                 <td class="p-4"><span class="px-2 py-1 rounded text-xs font-bold border" :class="res.round === 2 ? 'bg-purple-900/50 text-purple-200 border-purple-800' : 'bg-blue-900/50 text-blue-200 border-blue-800'" x-text="res.round === 2 ? 'REFINEMENT' : 'GENERATION'"></span></td>
-                                                <td class="p-4 font-mono text-yellow-300" x-text="res.time.toFixed(7) + 's'"></td>
+                                                <td class="p-4 font-mono text-yellow-300" x-text="res.time.toFixed(6) + 's'"></td>
                                                 <td class="p-4 font-mono text-gray-300" x-text="res.complexity"></td>
                                                 <td class="p-4">
                                                     <span x-show="res.success" class="text-green-400 font-bold text-xs bg-green-900/30 px-2 py-1 rounded border border-green-800">SUCCESS</span>
@@ -236,8 +302,13 @@
                 
                 // Arena Inputs
                 problem: 'Write a function that returns the nth Fibonacci number',
-                testInput: '10',
-                expectedOutput: '55', 
+                testInput: '',      // Empty = Auto
+                expectedOutput: '', // Empty = Auto
+
+                // Modal Logic
+                showModal: false,
+                podium: [],
+                finalVerdict: null,
 
                 // History
                 historyList: [],
@@ -251,6 +322,7 @@
                 promptContent: '',
 
                 async startBattle() {
+                    if(!this.problem) return;
                     this.running = true;
                     this.logs = ['> Initializing Battle...'];
                     
@@ -265,12 +337,18 @@
                     });
 
                     const eventSource = new EventSource('/api/stream_logs');
-                    eventSource.onmessage = (e) => {
+                    eventSource.onmessage = async (e) => {
                         if (e.data === 'DONE') {
                             eventSource.close();
                             this.running = false;
-                            this.logs.push('> BATTLE FINISHED.');
-                            this.loadHistory();
+                            this.logs.push('> BATTLE COMPLETE.');
+                            
+                            // Load history and show modal
+                            await this.loadHistory();
+                            if(this.historyList.length > 0) {
+                                await this.loadBattleDetails(this.historyList[0].id);
+                                this.triggerVictory(this.selectedBattle);
+                            }
                         } else {
                             this.logs.push(e.data);
                             this.$nextTick(() => {
@@ -281,6 +359,54 @@
                     };
                 },
 
+                triggerVictory(battleData) {
+                    // 1. Get Calculated Champion
+                    const championName = battleData.champion || "NO ONE";
+                    const judgePick = battleData.judge_verdict ? battleData.judge_verdict.winner : "None";
+
+                    // 2. Filter successful agents for podium
+                    let sorted = battleData.results.filter(r => r.success);
+                    
+                    if (championName === "NO ONE" || sorted.length === 0) {
+                        this.finalVerdict = { 
+                            winner: "NO ONE", 
+                            reasoning: "All agents failed to produce working code." 
+                        };
+                        this.podium = [];
+                        this.showModal = true;
+                        return;
+                    }
+
+                    // 3. Build Podium (Champion is Gold)
+                    const winner = sorted.find(r => r.agent === championName);
+                    const others = sorted.filter(r => r.agent !== championName);
+                    
+                    this.podium = [];
+                    if(winner) this.podium.push(winner);
+                    if(others[0]) this.podium.push(others[0]);
+                    if(others[1]) this.podium.push(others[1]);
+
+                    // 4. Set Verdict Text
+                    // If Judge picked someone else who failed, we explain it
+                    let reason = battleData.judge_verdict ? battleData.judge_verdict.reasoning : "";
+                    
+                    if (judgePick !== championName) {
+                        reason = `(Judge originally picked ${judgePick}, but ${championName} proved superior in execution!) ` + reason;
+                    }
+
+                    this.finalVerdict = {
+                        winner: championName,
+                        reasoning: reason
+                    };
+
+                    this.showModal = true;
+                    
+                    confetti({
+                        particleCount: 150,
+                        spread: 70,
+                        origin: { y: 0.6 }
+                    });
+                },
                 async loadHistory() {
                     const res = await fetch('/api/history');
                     this.historyList = await res.json();
@@ -336,11 +462,5 @@
             }
         }
     </script>
-    <style>
-        .scrollbar-thin::-webkit-scrollbar { width: 8px; height: 8px; }
-        .scrollbar-thin::-webkit-scrollbar-track { background: #1f2937; }
-        .scrollbar-thin::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
-        .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: #6b7280; }
-    </style>
 </body>
 </html>
