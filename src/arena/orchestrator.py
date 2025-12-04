@@ -7,12 +7,14 @@ from src.agents import Agent
 from src.judge.complexity import get_complexity_score
 from src.judge.execution import LocalSandbox
 from src.llm.llm_client import LocalLLM
+from src.judge.elo import EloSystem
 
 class BattleArena:
     def __init__(self, config_path="config/agents_config.yaml", log_callback=None):
         self.log_callback = log_callback
         self.config = self._load_config(config_path)
         self.llm = LocalLLM()
+        self.elo = EloSystem()
         
         self.agents = []
         self._initialize_agents()
@@ -39,7 +41,6 @@ class BattleArena:
         with open(path, 'r') as f: return yaml.safe_load(f)
 
     def _initialize_agents(self):
-        self.log("--- INITIALIZING AGENTS ---")
         for agent_conf in self.config['agents']:
             self.agents.append(Agent(
                 name=agent_conf['name'],
@@ -51,39 +52,23 @@ class BattleArena:
 
     def generate_test_case(self, problem):
         self.log("⚙️  The Architect (GPT-4o) is generating a test case...")
-        
         prompt = f"""
-        You are a QA Engineer.
-        For the coding problem: "{problem}"
-        
+        You are a QA Engineer. Problem: "{problem}"
         Generate ONE simple test case.
-        
-        CRITICAL RULES:
-        1. Output PURE JSON ONLY. No text before/after.
-        2. 'input' must be the RAW ARGUMENT (e.g. 5, not {{'n': 5}}).
-        3. 'output' must be the RAW RETURN value.
-        
-        Format:
-        {{
-            "input": <value>,
-            "output": <value>
-        }}
+        CRITICAL: Output PURE JSON ONLY {{ "input": ..., "output": ... }}.
+        'input' must be the RAW argument.
         """
-        
         for _ in range(2):
             try:
                 response = self.llm.get_response("gpt-4o", "You are a JSON generator.", prompt, force_local=False)
                 match = re.search(r'\{[\s\S]*\}', response)
-                if match:
-                    data = json.loads(match.group(0))
-                    return data['input'], data['output']
-            except:
-                continue
-
+                if match: return json.loads(match.group(0))['input'], json.loads(match.group(0))['output']
+            except: continue
         self.log("❌ Architect failed. Using defaults.")
-        raise Exception("Architect failed to generate test case.")
+        raise Exception("Architect failed.")
 
-    def start_round(self, problem, test_input=None, expected_output=None):
+    # --- PHASE 1: GENERATION & JUDGEMENT ---
+    def run_phase_1(self, problem, test_input=None, expected_output=None):
         battle_id = datetime.now().strftime("%Y%m%d_%H%M%S")
         self.log(f"⚔️  NEW BATTLE STARTED (ID: {battle_id})")
         
@@ -91,13 +76,12 @@ class BattleArena:
             test_input, expected_output = self.generate_test_case(problem)
             
         self.log(f"📝 PROBLEM: {problem}")
-        self.log(f"🧪 TEST INPUT: {test_input}")
+        self.log(f"🧪 INPUT: {test_input}") 
         self.log(f"🎯 EXPECTED: {expected_output}")
         
         sandbox = LocalSandbox()
         log_buffer = [f"BATTLE ID: {battle_id}", f"PROBLEM: {problem}", f"INPUT: {test_input}", f"EXPECTED: {expected_output}\n"]
         
-        # --- ROUND 1 ---
         self.log("\n--- ROUND 1: GENERATION ---")
         round1_scores = []
         r1_codes = {}
@@ -114,50 +98,80 @@ class BattleArena:
             self.log(f"   ↳ {agent.name} | Time: {stats['time']:.6f}s | {icon}")
             log_buffer.append(f"{agent.name}: {stats['msg']}")
 
-        # --- JUDGEMENT ---
         self.log("\n⚖️  THE JUDGE IS DELIBERATING...")
         verdict = self._call_ai_judge(problem, round1_scores)
+        self.log(f"👑 JUDGE'S PICK: {verdict.get('winner')}")
+
+        return {
+            "battle_id": battle_id,
+            "problem": problem,
+            "test_input": test_input,
+            "expected_output": expected_output,
+            "round1_scores": round1_scores,
+            "r1_codes": r1_codes,
+            "log_buffer": log_buffer,
+            "verdict": verdict
+        }
+
+    # --- PHASE 2: HUMAN INTERVENTION & REFINEMENT ---
+    def run_phase_2(self, state, human_critiques={}):
+        battle_id = state['battle_id']
+        problem = state['problem']
+        verdict = state['verdict']
         judge_pick = verdict.get('winner', 'None')
         critiques = verdict.get('critiques', {})
-        self.log(f"👑 JUDGE'S PICK: {judge_pick}")
         
-        winner_stats = next((s for s in round1_scores if s['agent'] == judge_pick), round1_scores[0])
+        sandbox = LocalSandbox()
+        
+        # Determine R1 Winner Stats safely
+        winner_stats = next((s for s in state['round1_scores'] if s['agent'] == judge_pick), state['round1_scores'][0])
 
-        # --- ROUND 2 ---
         self.log("\n--- ROUND 2: REFINEMENT ---")
         final_scores = []
 
         for agent in self.agents:
             if agent.name == judge_pick:
                 self.log(f"🏆 {agent.name} defends the throne.")
-                new_code = winner_stats['code'] 
+                new_code = winner_stats['code']
             else:
-                critique = critiques.get(agent.name, "Optimize code.")
+                ai_critique = critiques.get(agent.name, "Optimize code.")
+                human_note = human_critiques.get(agent.name, "")
                 
-                # FIX: SPLIT INTO TWO LOGS FOR UI
+                # Construct combined critique
+                combined_critique = ai_critique
+                
                 self.log(f"🤔 {agent.name} is fixing:")
-                self.log(f"    → \"{critique}\"")
+                
+                # --- FIX: Log detailed critique separately ---
+                self.log(f"    → AI: \"{ai_critique}\"")
+                
+                if human_note:
+                    combined_critique += f"\n\n HUMAN INTERVENTION: {human_note}"
+                    self.log(f"    → ⚠️ HUMAN: \"{human_note}\"")
                 
                 new_code = agent.refine_solution_with_critique(
-                    problem, r1_codes[agent.name], winner_stats['code'], critique
+                    problem, state['r1_codes'][agent.name], winner_stats['code'], combined_critique
                 )
 
             self._save_code(battle_id, agent.name, "R2", new_code)
-            stats = self._benchmark_agent(agent, new_code, sandbox, test_input, expected_output)
+            stats = self._benchmark_agent(agent, new_code, sandbox, state['test_input'], state['expected_output'])
             stats['round'] = 2
             
-            if stats['success']: self.log(f"   ↳ {agent.name} | ✅ Success (Time: {stats['time']:.6f}s)")
-            else: self.log(f"   ↳ {agent.name} | ❌ Failed")
-            
+            icon = "✅" if stats['success'] else "❌"
+            self.log(f"   ↳ {agent.name} | Time: {stats['time']:.6f}s | {icon}")
             final_scores.append(stats)
 
-        # FINAL RANKING
+        # Final Calculations
         final_scores.sort(key=lambda x: (not x['success'], x['time']))
         true_champion = final_scores[0]['agent'] if final_scores[0]['success'] else "NO ONE"
         
         self.log(f"\n🎉 ULTIMATE CHAMPION: {true_champion}")
+        
+        if true_champion != "NO ONE":
+            agent_names = [a.name for a in self.agents]
+            self.elo.update_ratings(agent_names, true_champion)
 
-        self._save_json(battle_id, problem, final_scores, log_buffer, verdict, test_input, expected_output, true_champion)
+        self._save_json(battle_id, problem, final_scores, state['log_buffer'], verdict, state['test_input'], state['expected_output'], true_champion)
         return final_scores
 
     def _save_json(self, battle_id, problem_text, scoreboard, log_buffer, verdict, inp, out, champion):
@@ -179,13 +193,10 @@ class BattleArena:
         evidence = f"PROBLEM: {problem}\n\n"
         for res in results:
             evidence += f"AGENT: {res['agent']}\nSTATUS: {'Success' if res['success'] else 'FAILED'}\nTIME: {res['time']:.6f}s\nCODE:\n{res['code']}\n\n"
-        
-        instruction = "\nIMPORTANT: You CANNOT pick a winner who has STATUS: FAILED. Pick the best working code."
-        
+        instruction = "\nIMPORTANT: You CANNOT pick a winner who has STATUS: FAILED."
         response = self.judge.llm.get_response(self.judge.model, self.judge.personality + instruction, evidence, force_local=False)
         try:
-            clean = response.replace("```json", "").replace("```", "").strip()
-            return json.loads(clean)
+            return json.loads(response.replace("```json", "").replace("```", "").strip())
         except:
             return {"winner": results[0]['agent'], "reasoning": "Judge Error", "critiques": {}}
 
