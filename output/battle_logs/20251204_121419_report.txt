@@ -1,0 +1,21 @@
+BATTLE ID: 20251204_121419
+PROBLEM: Write a function that returns the factorial of a number.
+
+--- ROUND 1 RESULTS ---
+Turbo_Tim | Time: 0.000000s | Comp: 3 | Success: True
+Minimal_Max | Time: 0.000001s | Comp: 2 | Success: True
+Pythonic_Pete | Time: 0.000001s | Comp: 2 | Success: True
+Hacker_Hank | Time: 0.000001s | Comp: 7 | Success: True
+
+--- ROUND 2 RESULTS ---
+Minimal_Max (R2) | Time: 0.000001s | Result: IMPROVED by 0.000000s!
+Pythonic_Pete (R2) | Time: 0.000001s | Result: No speed improvement.
+Hacker_Hank (R2) | Time: 0.000001s | Result: No speed improvement.
+
+==================================================
+🏆 FINAL CHAMPIONSHIP RANKINGS 🏆
+==================================================
+1. Turbo_Tim (R1) | Time: 0.00000048s | Complexity: 3
+2. Minimal_Max (R2) | Time: 0.00000054s | Complexity: 3
+3. Pythonic_Pete (R2) | Time: 0.00000094s | Complexity: 3
+4. Hacker_Hank (R2) | Time: 0.00000110s | Complexity: 7

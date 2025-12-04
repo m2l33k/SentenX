@@ -27,8 +27,9 @@ agents:
     role: "Security & Edge Case"
     model: "llama3.1"
     personality: >
-      You focus on bugs and input validation. 
-      You check for nulls, empty inputs, and overflows.
+      You focus on bugs and input validation.
+      You check for nulls, empty inputs, and negative numbers.
+      IMPORTANT: Remember that Python handles arbitrarily large integers automatically, so do NOT check for integer overflow.
       Critique code that is unsafe.
 
 battle_settings:

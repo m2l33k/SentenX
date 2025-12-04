@@ -14,8 +14,10 @@ class Agent:
         PROBLEM: {problem_statement}
         
         TASK: Write a Python function to solve this. 
-        Return ONLY the python code inside markdown code blocks ```python ... ```.
-        Do not add explanations outside the code block.
+        RULES:
+        1. Name the function 'solution'.
+        2. Return ONLY the python code inside markdown code blocks ```python ... ```.
+        3. Do NOT include usage examples or print statements, just the function.
         """
         
         response = self.llm.get_response(
@@ -24,9 +26,39 @@ class Agent:
             user_prompt=prompt
         )
         
-        # Simple extraction of code block
         self.current_code = self._extract_code(response)
         return self.current_code
+
+    def refine_solution(self, problem, my_prev_code, winner_code, winner_name):
+        """
+        Agent looks at the winner's code and tries to optimize their own.
+        """
+        prompt = f"""
+        PROBLEM: {problem}
+        
+        --- YOUR PREVIOUS ATTEMPT ---
+        {my_prev_code}
+        
+        --- THE WINNING SOLUTION (by {winner_name}) ---
+        {winner_code}
+        
+        TASK: 
+        The winning solution was faster or better than yours.
+        Analyze it. Steal their logic if you have to, but apply your own Personality ({self.role}) to make it EVEN BETTER.
+        
+        RULES:
+        1. Name the function 'solution'.
+        2. Return ONLY the python code inside markdown code blocks.
+        3. Do NOT add explanations.
+        """
+        
+        response = self.llm.get_response(
+            model_name=self.model,
+            system_prompt=self.personality,
+            user_prompt=prompt
+        )
+        
+        return self._extract_code(response)
 
     def _extract_code(self, text):
         """Helper to pull code out of markdown"""
@@ -35,22 +67,3 @@ class Agent:
         elif "```" in text:
             return text.split("```")[1].split("```")[0].strip()
         return text
-
-    def debate(self, other_agent_name, other_code):
-        prompt = f"""
-        Analyze the following code written by {other_agent_name}:
-        
-        ```python
-        {other_code}
-        ```
-        
-        Based on your personality ({self.role}), critique this code. 
-        Is it slow? Does it use too much memory? Is it ugly?
-        Be brief and harsh if necessary.
-        """
-        
-        return self.llm.get_response(
-            model_name=self.model,
-            system_prompt=self.personality,
-            user_prompt=prompt
-        )

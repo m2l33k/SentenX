@@ -16,7 +16,7 @@ class LocalSandbox:
             # 1. Compile the code
             # We wrap it in try/except to catch syntax errors immediately
             try:
-                exec(code_str, {}, local_scope)
+                exec(code_str, local_scope, local_scope)
             except SyntaxError as e:
                 return float('inf'), False, f"Syntax Error: {e}"
 

@@ -1,0 +1,15 @@
+BATTLE ID: 20251204_120605
+PROBLEM: Write a function that returns the factorial of a number.
+
+Turbo_Tim | Complexity: 3 | Time: 0.000001s | Status: Success
+Minimal_Max | Complexity: 2 | Time: 0.000001s | Status: Success
+Pythonic_Pete | Complexity: 4 | Time: 0.000001s | Status: Success
+Hacker_Hank | Complexity: 6 | Time: 0.000001s | Status: Success
+
+========================================
+🏆 FINAL RANKINGS 🏆
+========================================
+1. Hacker_Hank | Time: 0.00000065s | Complexity: 6 | File: 20251204_120605_Hacker_Hank.py
+2. Minimal_Max | Time: 0.00000072s | Complexity: 2 | File: 20251204_120605_Minimal_Max.py
+3. Turbo_Tim | Time: 0.00000086s | Complexity: 3 | File: 20251204_120605_Turbo_Tim.py
+4. Pythonic_Pete | Time: 0.00000112s | Complexity: 4 | File: 20251204_120605_Pythonic_Pete.py
