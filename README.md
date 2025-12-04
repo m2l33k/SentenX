@@ -3,10 +3,10 @@
 ![Status](https://img.shields.io/badge/Status-Operational-green)  
 ![Stack](https://img.shields.io/badge/Stack-Python_|_Flask_|_Ollama_|_GitHub_Models-blue)
 
-
 ![Cover Image](assets/generated-image.png)
 
-[Watch the video](assets/2025-12-04 14-57-51.mp4)
+![Demo Video](assets/2025-12-04%2014-57-51.mp4) 
+
 
 **Code Arena AI** is an advanced **Multi-Agent System (MAS)** where AI models compete to solve algorithmic problems. With a **Human-in-the-Loop** architecture, you can watch, critique, and judge battles in real-time via a modern Web UI.
 
@@ -131,23 +131,63 @@ Open your browser at: **http://127.0.0.1:5000**
 
 ```
 code_arena_ai/
+├── assets/
+│   ├── 2025-12-04 14-57-51.mp4
+│   └── generated-image.png
 ├── config/
-│   ├── agents_config.yaml   # Define Agent Models & Roles
-│   └── settings.yaml        # Global settings (Timeouts, Retries)
+│   ├── agents_config.yaml
+│   └── settings.yaml
 ├── output/
-│   ├── battle_logs/         # JSON logs of every battle
-│   ├── generated_code/      # Generated .py files
-│   └── elo_ratings.json     # Leaderboard data
-├── overview/                # Web Application
-│   ├── app.py               # Flask Backend
-│   └── templates/           # HTML/Tailwind UI
-├── prompts/                 # System Prompts for agents
+│   ├── battle_logs/
+│   │   ├── 20251204_120605_report.txt
+│   │   ├── 20251204_121419_report.txt
+│   │   ├── 20251204_123043_report.txt
+│   │   ├── 20251204_123941_data.json
+│   │   └── ...
+│   └── generated_code/
+│       ├── 20251204_120605_Hacker_Hank.py
+│       ├── 20251204_120605_Minimal_Max.py
+│       ├── 20251204_120605_Pythonic_Pete.py
+│       └── ...
+├── overview/
+│   ├── templates/
+│   │   ├── index.html
+│   │   └── leaderboard.html
+│   └── app.py
+├── prompts/
+│   ├── clean_coder.txt
+│   ├── debate_rules.txt
+│   ├── hacker.txt
+│   ├── judge.txt
+│   ├── mathematician.txt
+│   └── minimalist.txt
 ├── src/
-│   ├── agents/              # Agent Logic
-│   ├── arena/               # Orchestrator / Game Loop
-│   ├── judge/               # Execution & Scoring Logic
-│   └── llm/                 # Hybrid API Client (Ollama + OpenAI/GitHub)
-└── requirements.txt
+│   ├── agents/
+│   │   ├── __init__.py
+│   │   └── base_agent.py
+│   ├── arena/
+│   │   ├── __init__.py
+│   │   └── orchestrator.py
+│   ├── judge/
+│   │   ├── __init__.py
+│   │   ├── complexity.py
+│   │   ├── elo.py
+│   │   └── execution.py
+│   ├── llm/
+│   │   ├── __init__.py
+│   │   └── llm_client.py
+│   └── __init__.py
+├── tests/
+│   ├── test_benchmark.py
+│   └── test_sandbox.py
+├── .env
+├── .gitignore
+├── README.md
+├── main.py
+├── requirements.txt
+├── setup_project.py
+└── test_agent.py
+
 ```
 
 ---
